@@ -4,8 +4,22 @@ const net = require("net");
 console.log("Logs from your program will appear here!");
 
 // Uncomment this to pass the first stage
+
 const server = net.createServer((socket) => {
-  socket.write("HTTP/1.1 200 OK\r\n\r\n");
+  let data_received;
+  socket.on("data", (data) => {
+    data_received += data.toString();
+
+    const [HTTPmethod, target, version] = data_received.split(" ");
+    const [host, user, accept] = data_received.split("\r\n");
+
+    if (target == "/") {
+      socket.write("HTTP/1.1 200 OK\r\n\r\n");
+    } else {
+      socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
+    }
+  });
+
   socket.on("close", () => {
     socket.end();
   });
