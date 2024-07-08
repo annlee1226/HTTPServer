@@ -35,14 +35,26 @@ const server = net.createServer((socket) => {
       } else if (target.includes("/echo/")) {
         const str = target.split("/echo/")[1];
         const leng = str.length;
-        socket.write(
-          `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${leng}\r\n\r\n${str}`
+
+        const encoding = headers.find((header) =>
+          header.startsWith("Accept-Encoding: ")
         );
+        const gzip = encoding ? encoding.split(": ")[1] : "";
+
+        if (gzip == "gzip") {
+          socket.write(
+            `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: ${leng}\r\n\r\n${str}`
+          );
+        } else {
+          socket.write(
+            `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${leng}\r\n\r\n${str}`
+          );
+        }
       } else if (target.includes("/user-agent")) {
-        const userAgentHeader = headers.find((header) =>
+        const userheader = headers.find((header) =>
           header.startsWith("User-Agent:")
         );
-        const agent = userAgentHeader ? userAgentHeader.split(": ")[1] : "";
+        const agent = userheader.split(": ")[1];
         const leng = agent.length;
         socket.write(
           `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${leng}\r\n\r\n${agent}`
