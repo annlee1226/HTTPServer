@@ -5,6 +5,7 @@ console.log("Logs from your program will appear here!");
 
 const path = require("path");
 const fs = require("fs");
+const zlib = require("zlib");
 
 const args = process.argv.slice(2);
 let directory = args[1];
@@ -42,9 +43,16 @@ const server = net.createServer((socket) => {
         const gzip = encoding ? encoding.split(": ")[1] : "";
 
         if (gzip.includes("gzip")) {
-          socket.write(
-            `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: ${leng}\r\n\r\n${str}`
-          );
+          zlib.gzip(str, (err, buffer) => {
+            if (!err) {
+              socket.write(
+                `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: ${buffer.length}\r\n\r\n`
+              );
+              socket.write(buffer);
+            } else {
+              socket.write("HTTP/1.1 500 Internal Server Error\r\n\r\n");
+            }
+          });
         } else {
           socket.write(
             `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${leng}\r\n\r\n${str}`
