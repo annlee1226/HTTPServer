@@ -41,7 +41,7 @@ const server = net.createServer((socket) => {
         );
         const gzip = encoding ? encoding.split(": ")[1] : "";
 
-        if (gzip == "gzip") {
+        if (gzip.includes("gzip")) {
           socket.write(
             `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: ${leng}\r\n\r\n${str}`
           );
